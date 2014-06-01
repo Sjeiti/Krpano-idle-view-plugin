@@ -1,7 +1,7 @@
 /*global requestAnimFrame*/
 /**!
  * Krpano idle view plugin
- * The Krpano idle view plugin (formerly known as simplexIdle) uses Simplex noise to look around and zoom when the panorama is idle. The movement is random but not as random as Brownian motion. Simplex noise, like Perlin noise, interpolates between random numbers. The result is a motion that could be perceived as life-like.
+ * The Krpano idle view plugin (formerly simplexIdle) uses Simplex noise to look around and zoom when the panorama is idle. The movement is random but not as random as Brownian motion. Simplex noise, like Perlin noise, interpolates between random numbers. The result is a motion that could be perceived as life-like.
  * Additional copyrights and acknowlegdements:
  *    - Simplex noise: Stefan Gustavson, Sean McCullough, Karsten Schmidt, Ron Valstar
  *    - requestAnimFrame: Paul Irish, mr Doob
@@ -17,18 +17,17 @@
 	name="idleView"
 	url="../../vendor/krpano/idleView.min.js"
 	keep="true"
- 	idletimeout="10000"
- 	forceh=".2"
- 	forcev=".1"
+	idletimeout="10000"
+	forceh=".2"
+	forcev=".1"
 	forcez="0"
- 	frequencyh=".5"
- 	frequencyv=".5" attractz=".5"
+	frequencyh=".5"
+	frequencyv=".5" attractz=".5"
 />
  */
 window.krpanoplugin = function() {
 	'use strict';
-	var local = this
-		,krpano = null
+	var krpano = null
 		,plugin = null
 		//
 		,bEventsAdded = false
@@ -58,12 +57,12 @@ window.krpanoplugin = function() {
 		,fOffsetBase = 0.01
 		,fOffsetH = 0
 		//
-		,aRand = function(){
-			var a = [];
+		,aRand = function(a){
 			for (var i=0;i<16;i++) a.push(999+parseInt(99999*Math.random(),10));
 			return a;
-		}()
+		}([])
 		// custom events
+		,sEventInitialised = 'idleViewInitialized'
 		,sEventStart = 'idleViewStart'
 		,sEventEnd = 'idleViewEnd'
 		// animate
@@ -72,7 +71,7 @@ window.krpanoplugin = function() {
 		,fDTDeviation = 0.87
 		,fDTDeviation1 = 1/fDTDeviation
 		,iDTLen = 11
-			,aDeltaT = function(a){
+		,aDeltaT = function(a){
 			for (var i=0;i<iDTLen;i++) a.push(fDeltaT);
 			return a;
 		}([])
@@ -81,7 +80,8 @@ window.krpanoplugin = function() {
 	////////////////////////////////////////////////////////////
 	// plugin management
 
-	local.registerplugin = function(krpanointerface, pluginpath, pluginobject) {
+	this.registerplugin = function(krpanointerface, pluginpath, pluginobject) {
+		delete window.krpanoplugin;
 
 		krpano = krpanointerface;
 		plugin = pluginobject;
@@ -92,7 +92,7 @@ window.krpanoplugin = function() {
 		}
 
 		// find default fov
-//		console.log('krpano.get(xml)',krpano.get('xml')); // log
+		//console.log('krpano.get(xml)',krpano.get('xml')); // log
 		var xContent = krpano.get('xml').content;
 		var aFov = xContent&&xContent.match(/\sfov="([0-9]*)"/);
 		if (aFov&&aFov.length>1) iFovMiddle = parseInt(aFov[1],10);
@@ -119,10 +119,14 @@ window.krpanoplugin = function() {
 
 		// start
 		enable();
+
+		// expose // todo: expose subset only
+		plugin.toString = function(){return '[object krpano idle view plugin]';};
+		window.dispatchEvent(new CustomEvent(sEventInitialised,{detail:plugin}));
 	};
 
 
-	local.unloadplugin = function() {
+	this.unloadplugin = function() {
 		addEvents(false);
 		plugin = null;
 		krpano = null;
@@ -152,7 +156,7 @@ window.krpanoplugin = function() {
 
 	/**
 	 * Add (or remove) event listeners to which to react.
-	 * @param add
+	 * @param {Boolean} add Add or remove the events.
 	 */
 	function addEvents(add) {
 		if (add===undefined) add = true;
@@ -178,10 +182,9 @@ window.krpanoplugin = function() {
 	}
 	/**
 	 * Turn idling on- or off
-	 * @param b
+	 * @param {Boolean} Idling on or off.
 	 */
 	function setIdle(b){
-		console.log('setIdle',b); // log
 		if (b===undefined) {
 			b = true;
 		}
@@ -245,6 +248,12 @@ window.krpanoplugin = function() {
 			iLastT = null;
 		}
 	}
+
+	window.krpanoIdleViewPlugin = {
+
+
+		toString: function(){return '[object krpano idle view plugin]';}
+	};
 
 	////////////////////////////////////////////////////////////
 	////////////////////////////////////////////////////////////
