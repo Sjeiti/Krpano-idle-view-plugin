@@ -9,12 +9,12 @@ The plugin is initialized by adding an XML node like so:
 ```xml
 <plugin
 	name="idleView"
-	url="../src/idleView.js"
+	url="idleView.js"
 	keep="true"
 />
 ```
 
-The attributes that can be added to the element can be:
+The attributes that can be added to the &lt;plugin/&gt; node are:
 
  * **idletimeout**: The timeout in milliseconds.
  * **forceh**: The amount of horizontal movement.
@@ -33,7 +33,7 @@ The attributes that can be added to the element can be:
 ## Javascript interface
 
 The plugin throws a number of events for you to hook into.
-The events are dispatched from window.
+The events are dispatched from window. Check the example directory how this can be used.
 
 **idleViewInitialized**
 

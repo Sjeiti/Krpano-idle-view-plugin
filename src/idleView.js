@@ -131,7 +131,7 @@ window.krpanoplugin = function() {
 
 		// expose // todo: expose subset only
 		plugin.toString = function(){return '[object krpano idle view plugin]';};
-		window.dispatchEvent(new CustomEvent(sEventInitialised,{detail:plugin}));
+		dispatch(window,sEventInitialised,plugin);
 	};
 
 
@@ -162,6 +162,20 @@ window.krpanoplugin = function() {
 	}
 
 	// PRIVATE METHODS
+
+	/**
+	 * Dispatch a custom event.
+	 * @param {EventTarget} from
+	 * @param {String} type
+	 * @param {object} object
+	 * @returns {boolean}
+	 */
+	function dispatch(from,type,object){
+		//window.dispatchEvent(new CustomEvent(sEventInitialised,{detail:plugin}));
+		var eEvent = document.createEvent('CustomEvent');
+		eEvent.initCustomEvent(type,false,false,object);
+		return from.dispatchEvent(eEvent);
+	}
 
 	/**
 	 * Add (or remove) event listeners to which to react.
@@ -200,7 +214,7 @@ window.krpanoplugin = function() {
 		if (bIdle!==b) {
 			bIdle = b;
 			bIdle&&animate();
-			window.dispatchEvent(new CustomEvent(bIdle?sEventStart:sEventEnd));
+			dispatch(window,bIdle?sEventStart:sEventEnd,plugin);
 		}
 	}
 
