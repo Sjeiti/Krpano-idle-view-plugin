@@ -1,5 +1,5 @@
 /*global requestAnimFrame*/
-/**!
+/**
  * Krpano idle view plugin
  * The Krpano idle view plugin (formerly simplexIdle) uses Simplex noise to look around and zoom when the panorama is idle. The movement is random but not as random as Brownian motion. Simplex noise, like Perlin noise, interpolates between random numbers. The result is a motion that could be perceived as life-like.
  * Additional copyrights and acknowlegdements:
@@ -7,7 +7,7 @@
  *    - requestAnimFrame: Paul Irish, mr Doob
  * @summary Idle panoramas move around randomly.
  * @name idleView
- * @version 1.3.4
+ * @version 1.3.6
  * @licenseDual licensed under the MIT and GPL licenses: http://www.opensource.org/licenses/mit-license.php and http://www.gnu.org/licenses/gpl.html
  * @author Ron Valstar (http://www.sjeiti.com/)
  * @copyright Ron Valstar <ron@ronvalstar.nl>

@@ -2,7 +2,7 @@
   "name": "krpano.plugin.idleView",
   "title": "idleView",
   "description": "idleView plugin for krpano",
-  "version": "1.3.20",
+  "version": "1.3.6",
   "author": "Ron Valstar <ron@ronvalstar.nl>",
   "devDependencies": {
     "grunt": "~0.4.1",
