@@ -11,7 +11,7 @@
  * @licenseDual licensed under the MIT and GPL licenses: http://www.opensource.org/licenses/mit-license.php and http://www.gnu.org/licenses/gpl.html
  * @author Ron Valstar (http://www.sjeiti.com/)
  * @copyright Ron Valstar <ron@ronvalstar.nl>
- * @requires KrpanoJS 1.0.8.14
+ * @requires krpanoJS 1.0.8.14
  * @example
 <plugin
 	name="idleView"
@@ -205,7 +205,7 @@ window.krpanoplugin = function() {
 	}
 	/**
 	 * Turn idling on- or off
-	 * @param {Boolean} Idling on or off.
+	 * @param {Boolean} b Idling on or off.
 	 */
 	function setIdle(b){
 		if (b===undefined) {
