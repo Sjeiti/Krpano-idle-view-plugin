@@ -2,6 +2,7 @@
     "globals": {
 		"module": true,
 		"require": true,
+		"embedpanoJS": true,
 		"zen": true
 	},
     "strict": true,

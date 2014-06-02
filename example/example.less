@@ -1,3 +1,10 @@
+@import 'mixins';
+
+/* apply a natural box layout model to all elements */
+*, *:before, *:after {
+	-moz-box-sizing: border-box; -webkit-box-sizing: border-box; box-sizing: border-box;
+}
+
 html { height:100%; }
 body {
 	height:100%;
@@ -7,35 +14,31 @@ body {
 	font: 13px/35px Arial, sans;
 }
 h2 { text-align: center; }
-.pano-wrap { width:100%;height:100%; }
-.pano-wrap:after {
-	content: '';
-	position: absolute;
-	left: 0;
-	top: 0;
-	z-index: 1;
-	width: 100%;
-	height: 100%;
-	box-shadow: 0 0 512px rgba(26, 185, 149, 0.75) inset;
-	opacity: 0;
-	-webkit-transition: opacity 400ms linear;
-	transition: opacity 400ms linear;
-	pointer-events: none;
-}
-.idling:after {
-	opacity: 1;
+.pano-wrap {
+	.size(100%);
+	&:after {
+		content: '';
+		.lt;
+		z-index: 1;
+		.size(100%);
+		.box-shadow(0 0 512px rgba(26, 185, 149, 0.75) inset);
+		opacity: 0;
+		.transition(opacity 400ms linear);
+		pointer-events: none;
+	}
+	&.idling:after {
+		opacity: 1;
+	}
 }
 #interface {
-	position: absolute;
-	left: 0;
-	top: 0;
+	.lt;
 	z-index: 2;
 	margin: 10px;
 	padding: 10px;
-	background-color: rgba(255,255,255,0.7);
+	background-color: fade(white,70%);
 	color: black;
-	border-radius: 5px;
-	box-shadow: 0px 2px 8px rgba(0,0,0,.2);
+	.border-radius(5px);
+	.box-shadow(0px 2px 8px fade(black,20%));
 	& div {
 		position: relative;
 		height: 35px;
@@ -46,8 +49,41 @@ h2 { text-align: center; }
 	}
 }
 label {
+	@labelWidth: 6rem;
+	@infoSize: 12px;
+	@infoColor: #CCC;
 	display: inline-block;
-	width: 100px;
+	width: @labelWidth;
+	font-weight: bold;
+	&:after {
+		content: 'i';
+		.lt(@labelWidth - 1rem,.7);
+		display: inline-block;
+		.size-min(@infoSize);
+		.size-max(@infoSize);
+		.border-radius(@infoSize/2);
+		border: 1px solid @infoColor;
+
+		font: bold 9px/9px Arial, sans;
+		text-align: center;
+		color: @infoColor;
+		.transition(all 100ms linear);
+		overflow: hidden;
+	}
+	&:hover:after {
+		.size-max(100px);
+		top: 0;
+		padding: .3rem;
+		content: attr(data-info);
+		background-color: white;
+		color: #333;
+		z-index: 3;
+		text-align: left;
+		font: bold 9px/14px Arial, sans;
+		.border-radius(2px);
+		.box-shadow(1px 2px 4px fade(black,20%));
+		pointer-events: none;
+	}
 }
 input[type=range] {
 	margin-top: 5px;

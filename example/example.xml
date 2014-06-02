@@ -20,7 +20,7 @@
   	<plugin name="idleView"
 		url="../src/idleView.js"
 		keep="true"
-		idletimeout="1000"
+		idletimeout="200"
 		forceh="2.2"
 		forcev="1.1"
 		forcez="1.1"

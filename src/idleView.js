@@ -7,7 +7,7 @@
  *    - requestAnimFrame: Paul Irish, mr Doob
  * @summary Idle panoramas move around randomly.
  * @name idleView
- * @version 1.2.4
+ * @version 1.3.4
  * @licenseDual licensed under the MIT and GPL licenses: http://www.opensource.org/licenses/mit-license.php and http://www.gnu.org/licenses/gpl.html
  * @author Ron Valstar (http://www.sjeiti.com/)
  * @copyright Ron Valstar <ron@ronvalstar.nl>
@@ -15,14 +15,15 @@
  * @example
 <plugin
 	name="idleView"
-	url="../../vendor/krpano/idleView.min.js"
+	url="idleView.min.js"
 	keep="true"
 	idletimeout="10000"
 	forceh=".2"
 	forcev=".1"
 	forcez="0"
 	frequencyh=".5"
-	frequencyv=".5" attractz=".5"
+	frequencyv=".5"
+	attractz=".5"
 />
  */
 window.krpanoplugin = function() {
@@ -44,6 +45,10 @@ window.krpanoplugin = function() {
 		,fFreqHlookat = 1
 		,fFreqVlookat = 1
 		,fFreqFov = 1
+		//
+		,fGammaHlookat = 1
+		,fGammaVlookat = 1
+		,fGammaFov = 1
 		//
 		,iIdleTimeout = 1
 		//
@@ -107,6 +112,10 @@ window.krpanoplugin = function() {
 		plugin.registerattribute("frequencyh",fFreqHlookat,	function(f){fFreqHlookat=f;},	function(){ return fFreqHlookat; });
 		plugin.registerattribute("frequencyv",fFreqVlookat,	function(f){fFreqVlookat=f;},	function(){ return fFreqVlookat; });
 		plugin.registerattribute("frequencyz",fFreqFov,		function(f){fFreqFov=f;},		function(){ return fFreqFov; });
+
+		plugin.registerattribute("gammah",fGammaHlookat,	function(f){fGammaHlookat=f;},	function(){ return fGammaHlookat; });
+		plugin.registerattribute("gammav",fGammaVlookat,	function(f){fGammaVlookat=f;},	function(){ return fGammaVlookat; });
+		plugin.registerattribute("gammaz",fGammaFov,		function(f){fGammaFov=f;},		function(){ return fGammaFov; });
 
 		plugin.registerattribute("attractv",fAttractV,		function(f){fAttractV=f;},		function(){ return fAttractV; });
 		plugin.registerattribute("attractz",fAttractFov,	function(f){fAttractFov=f;},	function(){ return fAttractFov; });
@@ -196,6 +205,19 @@ window.krpanoplugin = function() {
 	}
 
 	/**
+	 * Gamma correction with negative implentation
+	 * @param {number} value
+	 * @param {number} exponent
+	 * @returns {number}
+	 */
+	function gamma(value,exponent){
+		var bNeg = value<0,fReturn;
+		if (bNeg) value = -value;
+		fReturn = Math.pow(value,exponent);
+		return bNeg?-fReturn:fReturn;
+	}
+
+	/**
 	 * The animation method that is run while idle.
 	 * Uses deltaT and noise to look around.
 	 */
@@ -212,7 +234,7 @@ window.krpanoplugin = function() {
 		// push and shift deltaT stack
 		aDeltaT.push(fTmpDeltaT);
 		aDeltaT.shift();
-		// calculate average deltaT
+		// calculate average (deltaT)
 		fDeltaT = 0;
 		for (var i=0;i<iDTLen;i++) fDeltaT += aDeltaT[i];
 		fDeltaT /= iDTLen;
@@ -221,23 +243,29 @@ window.krpanoplugin = function() {
 		//
 		if (bIdle) {
 			if (iDeltaTms<1000) { // can get too huge when window is hidden
-				var sCall = '';
+				var sCall = '',fNoise,fMove;
 				// horizontal
 				if (fForceHlookat>0) {
-					var h = fForceHlookat*fForceBase*(PerlinSimplex.noise(aRand[0]+fFreqHlookat*fFreqBase*t,aRand[1])-0.5) + fOffsetBase*fOffsetH;
-					sCall += 'set(hlookat_moveforce,'+fDeltaT*h+');';
+					fNoise = PerlinSimplex.noise(aRand[0]+fFreqHlookat*fFreqBase*t,aRand[1])-0.5;
+					if (fGammaHlookat!==1) fNoise = gamma(fNoise,fGammaHlookat);
+					fMove = fForceHlookat*fForceBase*fNoise + fOffsetBase*fOffsetH;
+					sCall += 'set(hlookat_moveforce,'+fDeltaT*fMove+');';
 				}
 				// vertical
 				if (fForceVlookat>0) {
-					var v = fForceVlookat	*fForceBase*(PerlinSimplex.noise(aRand[2]+fFreqVlookat*fFreqBase*t,aRand[3])-0.5);
-					if (fAttractV>=0)	v -= fAttractV*fAttractVBase*krpano.get('view.vlookat');
-					sCall += 'set(vlookat_moveforce,'+fDeltaT*v+');';
+					fNoise = PerlinSimplex.noise(aRand[2]+fFreqVlookat*fFreqBase*t,aRand[3])-0.5;
+					if (fGammaVlookat!==1) fNoise = gamma(fNoise,fGammaVlookat);
+					fMove = fForceVlookat*fForceBase*fNoise;
+					if (fAttractV>=0)	fMove -= fAttractV*fAttractVBase*krpano.get('view.vlookat');
+					sCall += 'set(vlookat_moveforce,'+fDeltaT*fMove+');';
 				}
 				// field of view
 				if (fForceFov>0) {
-					var o = fForceFov		*fForceBase*(PerlinSimplex.noise(aRand[4]+fFreqFov*fFreqBase*t,aRand[5])-0.5);
-					if (fAttractFov>=0)	o -= fAttractFov*fAttractFovBase*(krpano.get('view.fov')-iFovMiddle);
-					sCall += 'set(fov_moveforce,'+fDeltaT*o+');';
+					fNoise = PerlinSimplex.noise(aRand[4]+fFreqFov*fFreqBase*t,aRand[5])-0.5;
+					if (fGammaFov!==1) fNoise = gamma(fNoise,fGammaFov);
+					fMove = fForceFov*fForceBase*fNoise;
+					if (fAttractFov>=0)	fMove -= fAttractFov*fAttractFovBase*(krpano.get('view.fov')-iFovMiddle);
+					sCall += 'set(fov_moveforce,'+fDeltaT*fMove+');';
 				}
 				//
 				if (sCall!=='') krpano.call(sCall);
@@ -249,15 +277,12 @@ window.krpanoplugin = function() {
 		}
 	}
 
-	window.krpanoIdleViewPlugin = {
-
-
-		toString: function(){return '[object krpano idle view plugin]';}
-	};
-
 	////////////////////////////////////////////////////////////
 	////////////////////////////////////////////////////////////
 	////////////////////////////////////////////////////////////
+
+	// todo: move requestAnimFrame and PerlinSimplex outside this script
+
 
 	// requestAnimFrame :: http://paulirish.com/2011/requestanimationframe-for-smart-animating/
 	if (!window.hasOwnProperty('requestAnimFrame')) {
